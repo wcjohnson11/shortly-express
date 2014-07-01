@@ -13,8 +13,8 @@ var Link = require('../app/models/link');
 // Swap the commented lines or remove the 'x' from beforeEach
 // when working on authentication tests.
 /************************************************************/
-//var xbeforeEach = beforeEach;
-var xbeforeEach = function(){};
+// var xbeforeEach = beforeEach;
+var beforeEach = function(){};
 /************************************************************/
 
 
@@ -41,7 +41,7 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-         throw {
+        throw {
           type: 'DatabaseError',
           message: 'Failed to create test setup data'
         };

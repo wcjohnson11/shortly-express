@@ -1,4 +1,4 @@
-cd var express = require('express');
+var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 
@@ -10,6 +10,8 @@ var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
 var app = express();
+app.use(express.cookieParser());
+app.use(express.session({secret: 'hopscotch'}));
 
 app.configure(function() {
   app.set('views', __dirname + '/views');
@@ -23,11 +25,25 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
+app.get('/login', function(req, res) {
+  res.render('login');
+});
+
+app.get('/logout', function(req, res) {
+  req.session.destroy();
+  res.render('logout');
+});
+
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+
 app.get('/create', function(req, res) {
   res.render('index');
 });
 
 app.get('/links', function(req, res) {
+  var user = req.session.user;
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
@@ -69,23 +85,55 @@ app.post('/links', function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+var isAuthenticated = function(req, res, next) {
+  //if user is authenticated
+  if (req.user.authenticated) {
+    return next;
+  } else{
+  //redirect to login page
+  res.redirect(login);
+  }
+};
+
+//check if the user exists
+app.post('/signup', function(req,res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  new User({username: username, password: password}).fetch().then(function(user) {
+    if (user) {
+      //Make a custom error message
+      res.send(200, 'User Already exists');
+    } else {
+        bcrypt.hash(password, null, null, function(err, hash) {
+          var user = new User({
+            username: username,
+            password: hash
+          });
+          user.save().then(function(newUser) {
+            Users.add(newUser);
+            res.redirect('/');
+          });
+        });
+      }
+  });
+});
+
+
 
 app.post('/login', function(req, res){
-  var username = request.body.username;
-  var password = request.body.password;
-  var salt = bcrypt.genSaltSync(10);
-  var hash = bcrypt.hashSync(password, salt);
-  var userObj = db.users.findOne({ username: username, password: hash });
-
-  if (userObj) {
-    request.session.regenerate(function() {
-      request.session.user = userObj.username;
-      response.redirect('/restricted');
-    });
-  } else {
-    res.redirect('login');
-  }
+  var username = req.body.username;
+  var password = req.body.password;
+  util.isAuthenticated(username, password, function(Found) {
+    if (Found) {
+      console.log('routing to helper');
+      util.createSession(req, res, username);
+    } else {
+      res.redirect('/login');
+    }
+  });
 });
+
 
 
 /************************************************************/
