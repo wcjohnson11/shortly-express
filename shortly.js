@@ -1,4 +1,4 @@
-var express = require('express');
+cd var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 
@@ -15,7 +15,7 @@ app.configure(function() {
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(partials());
-  app.use(express.bodyParser())
+  app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -30,7 +30,7 @@ app.get('/create', function(req, res) {
 app.get('/links', function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
-  })
+  });
 });
 
 app.post('/links', function(req, res) {
@@ -70,6 +70,22 @@ app.post('/links', function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.post('/login', function(req, res){
+  var username = request.body.username;
+  var password = request.body.password;
+  var salt = bcrypt.genSaltSync(10);
+  var hash = bcrypt.hashSync(password, salt);
+  var userObj = db.users.findOne({ username: username, password: hash });
+
+  if (userObj) {
+    request.session.regenerate(function() {
+      request.session.user = userObj.username;
+      response.redirect('/restricted');
+    });
+  } else {
+    res.redirect('login');
+  }
+});
 
 
 /************************************************************/
