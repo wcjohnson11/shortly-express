@@ -22,6 +22,7 @@ app.configure(function() {
 });
 
 app.get('/', function(req, res) {
+  // console.log(util.isValidSession());
   res.render('index');
 });
 
@@ -44,6 +45,11 @@ app.get('/create', function(req, res) {
 
 app.get('/links', function(req, res) {
   var user = req.session.user;
+  //modify the fetch
+  //get the 
+  //user.links().fetch().then()
+  //
+
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
@@ -106,10 +112,10 @@ app.post('/signup', function(req,res) {
       res.send(200, 'User Already exists');
     } else {
         bcrypt.hash(password, null, null, function(err, hash) {
-          var user = new User({
+          Users.create({
             username: username,
             password: hash
-          });
+          }).then(function(user) {});
           user.save().then(function(newUser) {
             Users.add(newUser);
             res.redirect('/');

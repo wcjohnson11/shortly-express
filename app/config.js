@@ -22,8 +22,9 @@ db.knex.schema.hasTable('urls').then(function(exists) {
       link.string('code', 100);
       link.string('title', 255);
       link.integer('visits');
+      link.integer('user_id');
       link.timestamps();
-      link.integet('user_id')
+      //look into references and lazy loading
     }).then(function (table) {
       console.log('Created Table', table);
     });
